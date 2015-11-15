@@ -2,18 +2,22 @@
 Units is a simple library of unit conversion (Mass, Volume, Length, ...)
 
 For the list of units, refer to the file `unitlist.md`
+
 Values are entered according to the unit type, and behind the scenes
 are converted to a base unit value, then can be displayed and manipulated
 by helper procs that are named after the unity types.
 
 base units are 
 - gram (Mass)
-- litre (Volume)
 - meter (Length)
+- meter squared (Area)
+- meter cubed (Volume)
 - Kelvin (Temperature)
-- Newton (Energy)
 - degree (Angles)
 - second (Time)
+- gMPerS (Force) (newton is kgm/s = 1000 * gm/s)
+- gM2PerS2 (Energy) (joule is kgmm2/s2 = 1000 * gm2/s2)
+- Watt (Power)
 
 For each unit category, the values are converted to/from the base unit.
 Procedures are defined for each unit to 
