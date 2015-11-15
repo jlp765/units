@@ -1,6 +1,7 @@
 # units
 Units is a simple library of unit conversion (Mass, Volume, Length, ...)
 
+For the list of units, refer to the `unit list <unitlist.md>`
 Values are entered according to the unit type, and behind the scenes
 are converted to a base unit value, then can be displayed and manipulated
 by helper procs that are named after the unity types.
