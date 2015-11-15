@@ -36,7 +36,7 @@ Using the kilogram Mass example:
 So use the singular name to define a variable value, and use the plural name
 to convert or retrieve a variable as a different unit
 
-#### Exmaples
+#### Examples
 ```
 import units
 var m = kilogram(2.0)
