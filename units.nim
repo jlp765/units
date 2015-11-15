@@ -4,22 +4,25 @@
 ## are converted to a base unit value, then can be displayed and manipulated
 ## by helper procs that are named after the unity types.
 ##
-## base units are 
+## base units are
 ## - gram (Mass)
 ## - litre (Volume)
 ## - meter (Length)
 ## - Kelvin (Temperature)
-## - Newton (Energy)
 ## - degree (Angles)
 ## - second (Time)
+## - gMPerS (Force) (newton is kgm/s = 1000 * gm/s)
+## - Joule (Energy)
+## - Watt (Power)
 ##
 ## For each unit category, the values are converted to/from the base unit.
-## Procedures are defined for each unit to 
+## Procedures are defined for each unit to
 ## - convert SI multipliers to the base unit  e.g. ``var m = kilogram(2.0)``  means ``m=2000.0`` which is grams)
 ## - convert non-SI units to the base unit  e.g. ``var m = pound(1.0)``
 ##  includes: ``deka``, ``hecto``, ``kilo``, ``mega``, ``giga``, ``tera``, ``peta``, ``deci``, ``centi``, ``milli``, ``micro``, ``nano``, ``pico``, ``femto``, ``atto``
 ## - convert base unit to a number (proc has aq plural plural name) e.g.  ``echo m.pounds(), m.ounces()``
-## - provide the unit abbreviation  e.g.  kg, l, N, lb, in, s, .... 
+##  Note: where US and Imperial differ you will need to use gallonUS and gallonUK, pintUS, pintUK, etc
+## - provide the unit abbreviation  e.g.  kg, l, N, lb, in, s, ....
 ##  e.g., poundUnit(), inchUnit(), perchUnit(), slugUnit(), hectopascalUnit(), ....
 ## - numeric operators (+, -, \*, /) are also borrowed so that units can be combined using mathematical operations
 ##
@@ -41,6 +44,23 @@
 import macros, strutils, typetraits
 from math import PI
 
+type
+  gram* = distinct float    ## Mass
+  meter* = distinct float   ## Distance (or Length)
+  m2* = distinct float      ## Area = meter * meter = Length * Length
+  m3* = distinct float      ## Volume = meter * meter * meter = Area * Length
+  kelvin* = distinct float  ## Temperature
+  degree* = distinct float  ## Angular (rotation)
+  second* = distinct float  ## Time
+  mPerS* = distinct float   ## Speed = meter / second = Mass / Time
+  mPerS2* = distinct float  ## Acceleration = meter / second / second = Speed / Time
+  gMPerS2* = distinct float  ## Force = g * m / s / s = Mass * Acceleration
+  #newton* = distinct float  ## Force = kg * m / s / s = Mass * Acceleration
+  gM2PerS2* = distinct float ## Energy = gm/s * meter = Force * Distance = Mass * Speed * Speed
+  #joule* = distinct float   ## Energy = Newton * meter = Force * Distance
+  watt* = distinct float    ## Power = Joule/sec = Energy / Time = Force * Speed
+
+
 {.push hints:off.}  # avoid hints about [XDeclaredButNotUsed]
 const
   # MASS
@@ -56,34 +76,35 @@ const
   CaratToGram = 0.2
   QuintalToGram = 1.0e5   # 100 kg
   # VOLUME
-  QuartUSToLitre = 0.9463529
-  QuartUKToLitre = 1.1365225
-  PintUSToLitre = QuartUSToLitre / 2.0
-  PintUKToLitre = QuartUKToLitre / 2.0
-  CupToLitre = 0.25
-  CupUSToLitre = QuartUSToLitre / 4.0
-  CupUKToLitre = QuartUKToLitre / 4.0
-  FlOunceUSToLitre = QuartUSToLitre / 32.0
-  FlOunceUKToLitre = QuartUKToLitre / 40.0
-  GillUSToLitre = QuartUSToLitre / 8.0
-  GillUKToLitre = QuartUKToLitre / 8.0
-  MinimUSToLitre = QuartUSToLitre / 15360.0
-  MinimUKToLitre = QuartUKToLitre / 19200.0
-  TablespoonUSToLitre = PintUSToLitre / 32.0
-  TablespoonUKToLitre = PintUKToLitre / 32.0
-  TablespoonToLitre = 0.015
-  TeaspoonUSToLitre = FlOunceUSToLitre / 6.0
-  TeaspoonUKToLitre = FlOunceUKToLitre / 4.8
-  TeaspoonToLitre = 0.015
-  GallonUSToLitre = QuartUSToLitre * 4.0
-  GallonUKToLitre = QuartUKToLitre * 4.0
-  CcToLitre = 1.0e-3
-  DropToLitre = 0.05 * CcToLitre
-  BarrelUSToLitre = 31.5 * GallonUSToLitre
-  BarrelUKToLitre = 31.5 * GallonUKToLitre
-  HogsheadToLitre = 63.0 * GallonUSToLitre
-  TunToLitre = 4.0 * HogsheadToLitre
-  DramToLitre = QuartUSToLitre / 256.0
+  LitreToM3 = 1.0e-3
+  QuartUSToM3 = 0.9463529 / 1000.0
+  QuartUKToM3 = 1.1365225 / 1000.0
+  PintUSToM3 = QuartUSToM3 / 2.0
+  PintUKToM3 = QuartUKToM3 / 2.0
+  CupToM3 = 0.25 / 1000.0
+  CupUSToM3 = QuartUSToM3 / 4.0
+  CupUKToM3 = QuartUKToM3 / 4.0
+  FlOunceUSToM3 = QuartUSToM3 / 32.0
+  FlOunceUKToM3 = QuartUKToM3 / 40.0
+  GillUSToM3 = QuartUSToM3 / 8.0
+  GillUKToM3 = QuartUKToM3 / 8.0
+  MinimUSToM3 = QuartUSToM3 / 15360.0
+  MinimUKToM3 = QuartUKToM3 / 19200.0
+  TablespoonUSToM3 = PintUSToM3 / 32.0
+  TablespoonUKToM3 = PintUKToM3 / 32.0
+  TablespoonToM3 = 0.015 / 1000.0
+  TeaspoonUSToM3 = FlOunceUSToM3 / 6.0
+  TeaspoonUKToM3 = FlOunceUKToM3 / 4.8
+  TeaspoonToM3 = 0.015 / 1000.0
+  GallonUSToM3 = QuartUSToM3 * 4.0
+  GallonUKToM3 = QuartUKToM3 * 4.0
+  CcToM3 = 1.0e-6
+  DropToM3 = 0.05 * CcToM3
+  BarrelUSToM3 = 31.5 * GallonUSToM3
+  BarrelUKToM3 = 31.5 * GallonUKToM3
+  HogsheadToM3 = 63.0 * GallonUSToM3
+  TunToM3 = 4.0 * HogsheadToM3
+  DramToM3 = QuartUSToM3 / 256.0
 
   # Length
   InchToMeter = 25.4 / 1000.0
@@ -178,18 +199,8 @@ const
   DyneToNewton = 1.0e-5
   # ENERGY
   ErgToJoule = 1.0e7
- 
-{.pop.}
 
-type
-  gram* = distinct float
-  meter* = distinct float
-  litre* = distinct float
-  kelvin* = distinct float
-  newton* = distinct float
-  joule* = distinct float
-  degree* = distinct float
-  second* = distinct float
+{.pop.}
 
 template additive(typ: typedesc): stmt =
   proc `+` *(x, y: typ): typ {.borrow.}
@@ -203,7 +214,7 @@ template multiplicative(typ, base: typedesc): stmt =
   proc `*` *(x: typ, y: base): typ {.borrow.}
   proc `*` *(x: base, y: typ): typ {.borrow.}
   proc `/` *(x: typ, y: base): typ {.borrow.}
-  proc `/` *(x: base, y: typ): typ {.borrow.}
+  #proc `/` *(x: base, y: typ): typ {.borrow.}
   #proc `mod` *(x: typ, y: base): typ {.borrow.}
 
 template comparable(typ, base: typedesc): stmt =
@@ -229,6 +240,13 @@ template secondOrderSq(typ, resTyp, base: typedesc): stmt =
   #proc `*` *(x: base, y: typ): typ {.borrow.}
   #proc `*` *(x: resTyp, y: base): resTyp {.borrow.}
   #proc `*` *(x: base, y: resTyp): resTyp {.borrow.}
+
+template secondOrderMul(typ1, typ2, resTyp: typedesc): stmt =
+  proc `/` *(x: resTyp, y: typ1): typ2 {.borrow.}
+  proc `/` *(x: resTyp, y: typ2): typ1 {.borrow.}
+  proc `/` *(x: resTyp, y: resTyp): float {.borrow.}
+  proc `*` *(x: typ1, y: typ2): resTyp {.borrow.}
+  proc `*` *(x: typ2, y: typ1): resTyp {.borrow.}
 
 template makeConvertProcs(baseName, name, factor: expr, typ: typedesc): stmt =
   ## conversionMetricProcs(kilo, name, 1000.0)   # where name is gram
@@ -277,21 +295,24 @@ template multipliersMetric(name: expr, typ: typedesc): stmt =
 ## forward defs for doc purposes
 proc gramUnit*(): string
   ## display the unit string for gram (`g`)
-proc litreUnit*(): string
-  ## display the unit string for litre (`l`)
 proc meterUnit*(): string
   ## display the unit string for meter (`m`)
-proc jouleUnit*(): string
-  ## display the unit string for joule (`J`)
+proc m2Unit*(): string
+  ## display the unit string for square meter (`m2`)
+proc m3Unit*(): string
+  ## display the unit string for cubic meter (`m3`)
+
+#proc jouleUnit*(): string
+#  ## display the unit string for joule (`J`)
 proc kelvinUnit*(): string
   ## display the unit string for kelvin (`K`)
-proc newtonUnit*(): string
-  ## display the unit string for newton (`N`)
+#proc newtonUnit*(): string
+#  ## display the unit string for newton (`N`)
 proc degreeUnit*(): string
   ## display the unit string for (angular) degree (`deg`)
 proc secondUnit*(): string
   ## display the unit string for (time) second (`s`)
-  
+
 template defineUnitType(typ, base: expr, u: string): stmt =
   additive(typ)
   multiplicative(typ, base)
@@ -306,13 +327,31 @@ defineUnitType(gram, float, "g")
 ##  proc gram* (x: float): gram
 ##  proc grams* (x: gram): float
 ##  proc gramUnit* (x: gram): string
-defineUnitType(litre, float, "l")
 defineUnitType(meter, float, "m")
+defineUnitType(m2, float, "m2")     # meter squared  Area
+secondOrderSq(meter, m2, float)
+defineUnitType(m3, float, "m3")     # meter cubed    Volume
+secondOrderSq(m2, m3, meter)
 defineUnitType(kelvin, float, "K")
-defineUnitType(newton, float, "N")
-defineUnitType(joule, float, "J")
 defineUnitType(degree, float, "deg")
 defineUnitType(second, float, "s")
+
+defineUnitType(mPerS, float, "m/s")
+secondOrderRatio(meter, second, mPerS)  # relate second order term to first order terms
+
+defineUnitType(mPerS2, float, "m/s2")
+secondOrderRatio(mPerS, second, mPerS2)  # relate 3rd order term to 2nd order terms
+
+defineUnitType(gMPerS2, float, "gm/s")
+secondOrderMul(gram, mPerS2, gMPerS2)  # relate 3rd order term to 2nd order terms
+makeUnitProcs(newton, gMPerS2, 1.0e-3, float, "N")
+
+#proc newton(x: float|int): gMPerS {.inline.} = cast[gMPerS](1000.0 * x)
+#  ## define a newton in terms of the base
+#proc newtons(x: gMPerS): float {.inline.} = (result = x.float / 1000.0)
+
+defineUnitType(gM2PerS2, float, "gm2/s2")
+defineUnitType(watt, float, "W")
 
 # -- MASS --
 makeUnitProcs(pound, gram, PoundToGram, float, "lb")
@@ -327,34 +366,35 @@ makeUnitProcs(stone, gram, StoneToGram, float, "st")
 makeUnitProcs(carat, gram, CaratToGram, float, "c")
 makeUnitProcs(quintal, gram, QuintalToGram, float, "quintal")
 # -- VOLUME --
-makeUnitProcs(quartUS, litre, QuartUSToLitre, float, "qt (US)")
-makeUnitProcs(quartUK, litre, QuartUKToLitre, float, "qt (UK)")
-makeUnitProcs(pintUS, litre, PintUSToLitre, float, "pt (US)")
-makeUnitProcs(pintUK, litre, PintUKToLitre, float, "pt (UK)")
-makeUnitProcs(cup, litre, CupToLitre, float, "cup")
-makeUnitProcs(cupUS, litre, CupUSToLitre, float, "cup (US)")
-makeUnitProcs(cupUK, litre, CupUKToLitre, float, "cup (UK)")
-makeUnitProcs(flOunceUS, litre, FlOunceUSToLitre, float, "fl oz (US)")
-makeUnitProcs(flOunceUK, litre, FlOunceUKToLitre, float, "fl oz (UK)")
-makeUnitProcs(gillUS, litre, GillUSToLitre, float, "gill (US)")
-makeUnitProcs(gillUK, litre, GillUKToLitre, float, "gill (UK)")
-makeUnitProcs(minimUS, litre, MinimUSToLitre, float, "min (US)")
-makeUnitProcs(minimUK, litre, MinimUKToLitre, float, "mil (UK)")
-makeUnitProcs(tablespoonUS, litre, TablespoonUSToLitre, float, "tbsp (US)")
-makeUnitProcs(tablespoonUK, litre, TablespoonUKToLitre, float, "tbsp (UK)")
-makeUnitProcs(tablespoon, litre, TablespoonToLitre, float, "tbsp")
-makeUnitProcs(teaspoonUS, litre, TeaspoonUSToLitre, float, "tsp (US)")
-makeUnitProcs(teaspoonUK, litre, TeaspoonUKToLitre, float, "tsp (UK)")
-makeUnitProcs(teaspoon, litre, TeaspoonToLitre, float, "tsp")
-makeUnitProcs(gallonUS, litre, GallonUSToLitre, float, "gal (US)")
-makeUnitProcs(gallonUK, litre, GallonUKToLitre, float, "gal (UK)")
-makeUnitProcs(cc, litre, CcToLitre, float, "cc")
-makeUnitProcs(drop, litre, DropToLitre, float, "drop")
-makeUnitProcs(barrelUS, litre, BarrelUSToLitre, float, "bbl (US)")
-makeUnitProcs(barrelUK, litre, BarrelUKToLitre, float, "bbl (UK)")
-makeUnitProcs(hogshead, litre, HogsheadToLitre, float, "hh")
-makeUnitProcs(tun, litre, TunToLitre, float, "tun")
-makeUnitProcs(dram, litre, DramToLitre, float, "dram")
+makeUnitProcs(litre, m3, LitreToM3, float, "l")
+makeUnitProcs(quartUS, m3, QuartUSToM3, float, "qt (US)")
+makeUnitProcs(quartUK, m3, QuartUKToM3, float, "qt (UK)")
+makeUnitProcs(pintUS, m3, PintUSToM3, float, "pt (US)")
+makeUnitProcs(pintUK, m3, PintUKToM3, float, "pt (UK)")
+makeUnitProcs(cup, m3, CupToM3, float, "cup")
+makeUnitProcs(cupUS, m3, CupUSToM3, float, "cup (US)")
+makeUnitProcs(cupUK, m3, CupUKToM3, float, "cup (UK)")
+makeUnitProcs(flOunceUS, m3, FlOunceUSToM3, float, "fl oz (US)")
+makeUnitProcs(flOunceUK, m3, FlOunceUKToM3, float, "fl oz (UK)")
+makeUnitProcs(gillUS, m3, GillUSToM3, float, "gill (US)")
+makeUnitProcs(gillUK, m3, GillUKToM3, float, "gill (UK)")
+makeUnitProcs(minimUS, m3, MinimUSToM3, float, "min (US)")
+makeUnitProcs(minimUK, m3, MinimUKToM3, float, "mil (UK)")
+makeUnitProcs(tablespoonUS, m3, TablespoonUSToM3, float, "tbsp (US)")
+makeUnitProcs(tablespoonUK, m3, TablespoonUKToM3, float, "tbsp (UK)")
+makeUnitProcs(tablespoon, m3, TablespoonToM3, float, "tbsp")
+makeUnitProcs(teaspoonUS, m3, TeaspoonUSToM3, float, "tsp (US)")
+makeUnitProcs(teaspoonUK, m3, TeaspoonUKToM3, float, "tsp (UK)")
+makeUnitProcs(teaspoon, m3, TeaspoonToM3, float, "tsp")
+makeUnitProcs(gallonUS, m3, GallonUSToM3, float, "gal (US)")
+makeUnitProcs(gallonUK, m3, GallonUKToM3, float, "gal (UK)")
+makeUnitProcs(cc, m3, CcToM3, float, "cc")
+makeUnitProcs(drop, m3, DropToM3, float, "drop")
+makeUnitProcs(barrelUS, m3, BarrelUSToM3, float, "bbl (US)")
+makeUnitProcs(barrelUK, m3, BarrelUKToM3, float, "bbl (UK)")
+makeUnitProcs(hogshead, m3, HogsheadToM3, float, "hh")
+makeUnitProcs(tun, m3, TunToM3, float, "tun")
+makeUnitProcs(dram, m3, DramToM3, float, "dram")
 # -- LENGTH --
 makeUnitProcs(inch, meter, InchToMeter, float, "in")
 makeUnitProcs(foot, meter, FootToMeter, float, "ft")
@@ -400,37 +440,45 @@ makeUnitProcs(cable, meter, CableToMeter, float, "cbl")
 makeUnitProcs(parsec, meter, ParsecToMeter, float, "pc")
 makeUnitProcs(pixel, meter, PixelToMeter, float, "px")
 # -- TEMPERATURE --
-proc celsius*(x: float|int): kelvin {.inline.} =
-  result = kelvin(x.float + 274.15)
-proc celsius*(x: kelvin): float {.inline.} =
-  result = x.float - 274.15
+proc celsius*(c: float|int): kelvin {.inline.} =
+  ## convert a celsius value `c` to the base unit `K`
+  result = kelvin(c.float + 274.15)
+proc celsius*(K: kelvin): float {.inline.} =
+  ## return the celsius temperature value stored in `K`
+  result = K.float - 274.15
 proc celsiusUnit*(): string {.inline.} = (result = "degC")
+  ## return `degC` string
 
-proc fahrenheit*(x: float|int): kelvin {.inline.} =
-  result = kelvin((5.0/9.0*(x.float - 32.0) + 274.15))
+proc fahrenheit*(f: float|int): kelvin {.inline.} =
+  ## convert a fahrenheit value to the base unit `K`
+  result = kelvin((5.0/9.0*(f.float - 32.0) + 274.15))
 # printing values
-proc fahrenheit*(x: kelvin): float {.inline.} =
-  result = 9.0/5.0*(x.float - 274.15) + 32.0
+proc fahrenheit*(K: kelvin): float {.inline.} =
+  ## return the fahrenheit temperature value of the base unit `K`
+  result = 9.0/5.0*(K.float - 274.15) + 32.0
 # proc for displaying unit
 proc fahrenheitUnit* (): string {.inline.} = (result = "degF")
+  ## return `degF` string
 
-proc rankine*(x: float|int): kelvin {.inline.} =
-  result = kelvin(1.8 * x.float)
-# printing values
-proc rankine*(x: kelvin): float {.inline.} =
-  result = (x.float / 1.8)
-# proc for displaying unit
+proc rankine*(r: float|int): kelvin {.inline.} =
+  ## convert a rankine value to the base unit `K`
+  result = kelvin(1.8 * r.float)
+proc rankine*(K: kelvin): float {.inline.} =
+  ## return the rankine temperature value of the base unit `K`
+  result = (K.float / 1.8)
 proc rankineUnit* (): string {.inline.} = (result = "degR")
+  ## return `degR` string
 
-proc reaumur*(x: float|int): kelvin {.inline.} =
+proc reaumur*(r: float|int): kelvin {.inline.} =
+  ## convert a reaumur value to the base unit `K`
   let r2c = 100.0/80.0
-  result = kelvin(celsius(r2c * x.float))
-# printing values
-proc reaumur*(x: kelvin): float {.inline.} =
+  result = celsius(r2c * r.float)
+proc reaumur*(K: kelvin): float {.inline.} =
+  ## return the reaumur temperature value of the base unit `K`
   let c2r = 80.0/100.0
-  result = (celsius(x) * c2r)
-# proc for displaying unit
+  result = (celsius(K) * c2r)
 proc reaumurUnit* (): string {.inline.} = (result = "degr")
+  ## return `degr` string
 
 # -- ANGLE --
 makeUnitProcs(radian, degree, RadianToDegree, float, "rad")
@@ -484,8 +532,15 @@ when isMainModule:
   assert($t1.celsius() == "0.0")
   #echo t1.celsius," ",celsiusUnit()," is ", t1.reaumur()," ", reaumurUnit()
 
-  #var m2 = mSq(10.0)
-  #var f = m2 / lgth
+  var mtr2 = m2(10.0)
+  var f = mtr2 / lgth
+  assert(2.0.m2 + mtr2 == m2(12.0))
+  #echo mtr2, "/", lgth, " = ", mtr2 / lgth, "  as feet: ", f.feet
+  assert(meter(10.93613298337708) - (mtr2 / lgth) <  meter(2.0e-15))
+  assert(f.feet - 35.87970138903241 < 2.0e-15)
 
-  #echo 2.0.mSq + m2, " and ", m2
-  #echo m2 / lgth, "  as feet: ", f.feet
+  var mps = meter(10.0) / second(10.0)
+  assert(mps == mPerS(1.0))
+
+  var newt = kilogram(1.0) * mPerS2(1.0)
+  echo newt.newton, " ", newt
