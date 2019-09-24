@@ -4,8 +4,8 @@ Units is a simple library of unit conversion (Mass, Volume, Length, ...)
 **For the list of units, refer to the file `unitlist.md`**
 
 Values are entered according to the unit type, and behind the scenes
-are converted to a base unit value, then can be displayed and manipulated
-by helper procs that are named after the unity types.
+are converted to a base unit value, which then can be displayed and 
+manipulated by helper procs that are named after the unity types.
 
 base units are 
 - gram (Mass)
@@ -27,7 +27,7 @@ Procedures are defined for each unit to
  includes: ``deka``, ``hecto``, ``kilo``, ``mega``, ``giga``, ``tera``, ``peta``, ``deci``, ``centi``, ``milli``, ``micro``, ``nano``, ``pico``, ``femto``, ``atto``
 - convert base unit to a number (proc has aq plural plural name) e.g.  ``echo m.pounds(), m.ounces()``
 
- Note: where US and Imperial differ you will need to use gallonUS and gallonUK, pintUS, pintUK, etc
+ *Note: where US and Imperial differ you will need to use gallonUS and gallonUK, pintUS, pintUK, etc*
 - provide the unit abbreviation  e.g.  kg, l, N, lb, in, s, .... 
 
  e.g., poundUnit(), inchUnit(), perchUnit(), slugUnit(), hectopascalUnit(), ....
