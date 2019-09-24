@@ -1,8 +1,8 @@
 ## Units - a simple library of unit conversion.
 ##
 ## Values are entered according to the unit type, and behind the scenes
-## are converted to a base unit value, then can be displayed and manipulated
-## by helper procs that are named after the unity types.
+## are converted to a base unit value, which then can be displayed and 
+## manipulated by helper procs that are named after the unity types.
 ##
 ## base units are
 ## - gram (Mass)
@@ -21,7 +21,7 @@
 ## - convert non-SI units to the base unit  e.g. ``var m = pound(1.0)``
 ##  includes: ``deka``, ``hecto``, ``kilo``, ``mega``, ``giga``, ``tera``, ``peta``, ``deci``, ``centi``, ``milli``, ``micro``, ``nano``, ``pico``, ``femto``, ``atto``
 ## - convert base unit to a number (proc has aq plural plural name) e.g.  ``echo m.pounds(), m.ounces()``
-##  Note: where US and Imperial differ you will need to use gallonUS and gallonUK, pintUS, pintUK, etc
+##  *Note: where US and Imperial differ you will need to use gallonUS and gallonUK, pintUS, pintUK, etc*
 ## - provide the unit abbreviation  e.g.  kg, l, N, lb, in, s, ....
 ##  e.g., poundUnit(), inchUnit(), perchUnit(), slugUnit(), hectopascalUnit(), ....
 ## - numeric operators (+, -, \*, /) are also borrowed so that units can be combined using mathematical operations
